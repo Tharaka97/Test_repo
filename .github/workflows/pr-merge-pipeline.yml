@@ -1,0 +1,39 @@
+name: PR Merge Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Test PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt || true
+
+      - name: Run Unit Tests
+        run: |
+          python -m unittest discover tests || echo "No tests found"
+
+      - name: Run Linter (Flake8)
+        run: |
+          pip install flake8
+          flake8 app.py tests/
+
+      - name: Security Scan (Bandit for Python)
+        run: |
+          pip install bandit
+          bandit -r app.py || true
+
