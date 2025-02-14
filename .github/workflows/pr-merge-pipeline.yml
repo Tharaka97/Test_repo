@@ -1,4 +1,4 @@
-name: PR Merge Pipeline
+name: PR Merge Pipeline with SonarQube
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build and Test PR
+    name: Build, Test & Analyze PR
     runs-on: ubuntu-latest
 
     steps:
@@ -32,8 +32,16 @@ jobs:
           pip install flake8
           flake8 app.py tests/
 
-      - name: Security Scan (Bandit for Python)
+      - name: Security Scan (Bandit)
         run: |
           pip install bandit
           bandit -r app.py || true
+
+      # SonarQube Analysis Step
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 
